@@ -1,0 +1,177 @@
+<!DOCTYPE html> 
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Random Delay Music Player</title>
+  <meta charset="utf-8" />
+  <style type="text/css">
+  <!--
+    a.control {font-size:150%;}
+    @media only screen and (max-device-width : 480px){
+      div.status {font-size:120%;}
+      div.control{font-size:120%;}
+      div.input  {font-size:120%;}
+    }
+  -->
+  </style>
+  <script type="text/javascript">
+    var audioElem;
+    var moji;
+    var min;
+    var max;
+    var startTimeS = 0;
+    var stopTimeS  = 0;
+    var startTimer;
+    var stopTimer;
+		var startTimeForm;
+		var stopTimeForm;
+    var musicURL;
+
+    window.onload = function onLoad(){
+      var musicFile = document.getElementById("musicFileInputId");
+      min = 5;
+      max = 10;
+      moji     = document.getElementById("output");
+      timespec = document.getElementById("timespec");
+      time_from = document.getElementById("time_from");
+
+//      audioElem = new Audio();
+      audioElem = document.getElementById("audioControl");
+
+      musicURL = "yonhonnorecorder.mp3"; // mp3のファイル名
+      audioElem.src = musicURL;
+
+      timespec.innerHTML = min + "〜" + max + "秒";
+
+      moji.innerHTML     = "stop";
+      // moji.innerHTML     = "初回やリロード直後は音が出ないことがあります。一度[▶️再生]を押すと、正常動作するようになります。";
+
+			startTimeS = 0;
+			stopTimeS = 0;
+      startTimeForm = document.forms.startTimeForm;
+      stopTimeForm  = document.forms.stopTimeForm;
+      startTimeForm.sec.value = startTimeS;
+      stopTimeForm.sec.value  = stopTimeS;
+      audioElem.currentTime = startTimeS;
+
+      musicFileForm = document.forms.musicFileInput;
+      musicFileForm.musicFileInputId.value = "";
+    }
+
+    function PlaySound() {
+			StopSound();
+      audioElem.currentTime = startTimeS;
+      audioElem.play();
+      moji.innerHTML = "Playing";
+			document.bgColor = "#FFFFFF";
+			clearInterval(stopTimer);
+			if (stopTimeS > 0){
+        moji.innerHTML = "Playing until " + stopTimeS + " s";
+				var stop_ms = parseInt(stopTimeS * 1000);
+        stopTimer = setTimeout("StopSound()", stop_ms);
+			}
+    }
+    function DelayPlaySound() {
+      audioElem.play();
+			StopSound();
+      var sec = min + (max - min) * Math.random();
+      var milisec = parseInt(sec * 1000);
+      moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
+			document.bgColor = "#EEEEFF";
+      startTimer = setTimeout("PlaySound()", milisec);
+    }
+    function StopSound(){
+      audioElem.pause();
+			clearInterval(stopTimer);
+      moji.innerHTML = "stop";
+    }
+  </script>
+</head>
+<body>
+  <div class="status" id="output">javascript disabled.</div>
+  <div class="control">
+    <a class="control" href="javascript:void(0);" onclick="PlaySound();">▶️再生</a>
+		<span class="status" id="time_from"></span><br/>
+    <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
+    <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
+    <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
+  </div>
+  <audio id="audioControl" controls></audio>
+	<div class="input">
+    <form name="startTimeForm">演奏開始位置:<input type="number" id="startTime" name="sec" value="0" pattern="[0-9]*">秒</form>
+  </div>
+	<div class="input">
+    <form name="stopTimeForm">演奏秒数:<input type="number" id="stopTime" name="sec" value="0" pattern="[0-9]*">秒</form>(0は最後まで演奏)
+  </div>
+  <div class="input">
+    <!-- NG 2020-may accept="audio/*" -->
+    <!-- NG 2020-may accept="audio/*,mp3" -->
+    <form name="musicFileInput"><input type="file" id="musicFileInputId" accept="mp3"></form>
+  </div>
+  <script type="text/javascript">
+<!--    
+    var musicFile = document.getElementById("musicFileInputId");
+    musicFile.onchange = function(){
+      if (musicFile.value){
+        var file = musicFile.files[0];
+        musicURL = URL.createObjectURL(file);
+        // console.log( file );
+        // console.log( musicURL );
+        audioElem.setAttribute('src', musicURL);
+        console.log( audioElem.src );
+      }
+    }
+    var startTimeInput = document.getElementById("startTime");
+    startTimeInput.onchange = function(){
+      startTimeS = parseInt( startTimeInput.value );
+      audioElem.currentTime = startTimeS;
+			StopSound();
+			if (stopTimeS > 0){
+        time_from.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
+			}else{
+        time_from.innerHTML = startTimeS + "秒時点から";
+			}
+		}
+    var stopTimeInput = document.getElementById("stopTime");
+    stopTimeInput.onchange = function(){
+      stopTimeS = parseInt( stopTimeInput.value );
+			StopSound();
+			if (stopTimeS > 0){
+        time_from.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
+			}else{
+        time_from.innerHTML = startTimeS + "秒時点から";
+			}
+		}
+//-->
+</script>
+
+<hr>
+<h3>説明</h3>
+<h4>このページは？</h4>
+<p>このwebページは、指定したファイル(.mp3)の音楽を、ランダムな秒数だけ待ってから再生します。</p>
+<h4>再生する楽曲</h4>
+<p>WindowsやMacやAndrondをお使いの場合、そのPCやデバイスにあるmp3ファイルが選択できます。</p>
+<p>iOSをお使いの場合、あなたのiCloud DriveやDropboxにあるmp3ファイルが選択できます。（「ミュージック」アプリの楽曲は選択できないようです）</p>
+<p>ファイルが未選択だと、(動作未検証)</p>
+<h4>再生を待つ秒数</h4>
+「(数字)〜(数字)秒後に再生⏰▶️」を押すと、その範囲内のランダムな秒数だけ待ってから楽曲を再生します。
+<h4>再生開始時点、終了時点</h4>
+<p>
+「演奏開始位置」と「演奏秒数」で、指定した楽曲の、何秒目から、何秒間を再生するか指定できます。
+「演奏秒数」が0だと、その楽曲を最後まで再生します。</p>
+
+<h4>音が出ない</h4>
+<p>
+初回やリロード直後は[...秒後に再生]を押しても、音が出ないことがあります。
+一度[再生]を押すと、正常動作するようになります。
+初回音が出ないのは、iOSやAndroidのブラウザーに、
+ユーザーの操作時にしか音楽が再生できないという制限があるためです。</p>
+<p>参考：
+<a href="http://jquerystudy.info/wordpress/?p=6647">ブラウザアプリでのサウンド再生（苦悩編）</a>、
+<a href="https://qiita.com/pentamania/items/2c568a9ec52148bbfd08">qiita iOSでのオーディオ再生制限の解除方法いろいろ</a></p>
+
+
+</body>
+</html>
+
