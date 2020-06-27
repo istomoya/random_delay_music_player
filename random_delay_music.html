@@ -24,8 +24,8 @@
     var stopTimeS  = 0;
     var startTimer;
     var stopTimer;
-		var startTimeForm;
-		var stopTimeForm;
+    var startTimeForm;
+    var stopTimeForm;
     var musicURL;
 
     window.onload = function onLoad(){
@@ -47,8 +47,8 @@
       moji.innerHTML     = "stop";
       // moji.innerHTML     = "初回やリロード直後は音が出ないことがあります。一度[▶️再生]を押すと、正常動作するようになります。";
 
-			startTimeS = 0;
-			stopTimeS = 0;
+      startTimeS = 0;
+      stopTimeS = 0;
       startTimeForm = document.forms.startTimeForm;
       stopTimeForm  = document.forms.stopTimeForm;
       startTimeForm.sec.value = startTimeS;
@@ -60,31 +60,33 @@
     }
 
     function PlaySound() {
-			StopSound();
+      StopSound();
       audioElem.currentTime = startTimeS;
       audioElem.play();
       moji.innerHTML = "Playing";
-			document.bgColor = "#FFFFFF";
-			clearInterval(stopTimer);
-			if (stopTimeS > 0){
+      document.bgColor = "#FFFFFF";
+      clearInterval(stopTimer);
+      if (stopTimeS > 0){
         moji.innerHTML = "Playing until " + stopTimeS + " s";
-				var stop_ms = parseInt(stopTimeS * 1000);
+        var stop_ms = parseInt(stopTimeS * 1000);
         stopTimer = setTimeout("StopSound()", stop_ms);
-			}
+      }
     }
     function DelayPlaySound() {
       audioElem.play();
-			StopSound();
+      StopSound();
       var sec = min + (max - min) * Math.random();
       var milisec = parseInt(sec * 1000);
       moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
-			document.bgColor = "#EEEEFF";
+      document.bgColor = "#EEEEFF";
       startTimer = setTimeout("PlaySound()", milisec);
     }
     function StopSound(){
       audioElem.pause();
-			clearInterval(stopTimer);
+			clearTimeout(startTimer);
+      clearInterval(stopTimer);
       moji.innerHTML = "stop";
+      document.bgColor = "#FFFFFF";
     }
   </script>
 </head>
@@ -92,16 +94,16 @@
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
     <a class="control" href="javascript:void(0);" onclick="PlaySound();">▶️再生</a>
-		<span class="status" id="time_from"></span><br/>
+    <span class="status" id="time_from"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
     <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
   </div>
   <audio id="audioControl" controls></audio>
-	<div class="input">
+  <div class="input">
     <form name="startTimeForm">演奏開始位置:<input type="number" id="startTime" name="sec" value="0" pattern="[0-9]*">秒</form>
   </div>
-	<div class="input">
+  <div class="input">
     <form name="stopTimeForm">演奏秒数:<input type="number" id="stopTime" name="sec" value="0" pattern="[0-9]*">秒</form>(0は最後まで演奏)
   </div>
   <div class="input">
@@ -126,23 +128,23 @@
     startTimeInput.onchange = function(){
       startTimeS = parseInt( startTimeInput.value );
       audioElem.currentTime = startTimeS;
-			StopSound();
-			if (stopTimeS > 0){
+      StopSound();
+      if (stopTimeS > 0){
         time_from.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
-			}else{
+      }else{
         time_from.innerHTML = startTimeS + "秒時点から";
-			}
-		}
+      }
+    }
     var stopTimeInput = document.getElementById("stopTime");
     stopTimeInput.onchange = function(){
       stopTimeS = parseInt( stopTimeInput.value );
-			StopSound();
-			if (stopTimeS > 0){
+      StopSound();
+      if (stopTimeS > 0){
         time_from.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
-			}else{
+      }else{
         time_from.innerHTML = startTimeS + "秒時点から";
-			}
-		}
+      }
+    }
 //-->
 </script>
 
