@@ -28,6 +28,21 @@
     var stopTimeForm;
     var musicURL;
 
+    // https://www.html5rocks.com/ja/tutorials/webaudio/intro/#toc-volume
+    var context;
+    window.addEventListener('load', init, false);
+    function init() {
+      try {
+        // Fix up for prefixing
+        window.AudioContext = window.AudioContext||window.webkitAudioContext;
+        context = new AudioContext();
+        // alert('AudoContext ready');
+      }
+      catch(e) {
+        alert('Web Audio API is not supported in this browser');
+      }
+    }
+
     window.onload = function onLoad(){
       var musicFile = document.getElementById("musicFileInputId");
       min = 5;
@@ -36,11 +51,14 @@
       timespec = document.getElementById("timespec");
       time_from = document.getElementById("time_from");
 
-//      audioElem = new Audio();
       audioElem = document.getElementById("audioControl");
 
       musicURL = "yonhonnorecorder.mp3"; // mp3のファイル名
       audioElem.src = musicURL;
+
+			var gainNode = context.createGain();
+			//audioElem.connect(gainNode);
+			gainNode.connect(context.destination);
 
       timespec.innerHTML = min + "〜" + max + "秒";
 
@@ -57,9 +75,25 @@
 
       musicFileForm = document.forms.musicFileInput;
       musicFileForm.musicFileInputId.value = "";
+
+      ifRandomFormCheck = document.forms.ifRandomForm.randomVolume;
+      ifRandomFormCheck.checked = false;
     }
 
+    function PlaySoundLoud() {
+			// unavailable on iOS // audioElem.volume=1.0;
+
+			gainNode.gain.value = 1.0;
+			PlaySoundCommon();
+		}
+
+
     function PlaySound() {
+			// unavailable on iOS // audioElem.volume=0.5;
+			// gainNode.gain.value = 0.5;
+      PlaySoundCommon();
+		}
+    function PlaySoundCommon() {
       StopSound();
       audioElem.currentTime = startTimeS;
       audioElem.play();
@@ -75,11 +109,23 @@
     function DelayPlaySound() {
       audioElem.play();
       StopSound();
+
       var sec = min + (max - min) * Math.random();
       var milisec = parseInt(sec * 1000);
-      moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
-      document.bgColor = "#EEEEFF";
-      startTimer = setTimeout("PlaySound()", milisec);
+  //    const ifRandomForm = document.forms.ifRandomForm;
+//      const ifRandomFormCheck = document.forms.ifRandomForm.randomVolume;
+			if (ifRandomFormCheck.checked){
+        moji.innerHTML = "Random Volume. Are you ready? (delay " + min + "-" + max + " s)";
+				if (Math.random() < 0.3){
+          startTimer = setTimeout("PlaySoundLoud()", milisec);
+				}else{
+          startTimer = setTimeout("PlaySound()", milisec);
+				}
+			} else {
+        moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
+        startTimer = setTimeout("PlaySound()", milisec);
+			}
+      document.bgColor = "#CCCCFF";
     }
     function StopSound(){
       audioElem.pause();
@@ -94,12 +140,16 @@
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
     <a class="control" href="javascript:void(0);" onclick="PlaySound();">▶️再生</a>
+    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud();">▶️大音量再生</a>
     <span class="status" id="time_from"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
     <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
   </div>
   <audio id="audioControl" controls></audio>
+  <div class="input">
+		<form name="ifRandomForm"><input type="checkbox" name="randomVolume">ランダムに大音量</form>
+  </div>
   <div class="input">
     <form name="startTimeForm">演奏開始位置:<input type="number" id="startTime" name="sec" value="0" pattern="[0-9]*">秒</form>
   </div>

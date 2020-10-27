@@ -57,22 +57,9 @@
 
       musicFileForm = document.forms.musicFileInput;
       musicFileForm.musicFileInputId.value = "";
-
-      ifRandomFormCheck = document.forms.ifRandomForm.randomVolume;
-      ifRandomFormCheck.checked = false;
     }
 
-    function PlaySoundLoud() {
-			audioElem.volume=1.0;
-			PlaySoundCommon();
-		}
-
-
     function PlaySound() {
-			audioElem.volume=0.5;
-      PlaySoundCommon();
-		}
-    function PlaySoundCommon() {
       StopSound();
       audioElem.currentTime = startTimeS;
       audioElem.play();
@@ -88,23 +75,11 @@
     function DelayPlaySound() {
       audioElem.play();
       StopSound();
-
       var sec = min + (max - min) * Math.random();
       var milisec = parseInt(sec * 1000);
-  //    const ifRandomForm = document.forms.ifRandomForm;
-//      const ifRandomFormCheck = document.forms.ifRandomForm.randomVolume;
-			if (ifRandomFormCheck.checked){
-        moji.innerHTML = "Random Volume. Are you ready? (delay " + min + "-" + max + " s)";
-				if (Math.random() < 0.3){
-          startTimer = setTimeout("PlaySoundLoud()", milisec);
-				}else{
-          startTimer = setTimeout("PlaySound()", milisec);
-				}
-			} else {
-        moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
-        startTimer = setTimeout("PlaySound()", milisec);
-			}
-      document.bgColor = "#CCCCFF";
+      moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
+      document.bgColor = "#EEEEFF";
+      startTimer = setTimeout("PlaySound()", milisec);
     }
     function StopSound(){
       audioElem.pause();
@@ -119,16 +94,12 @@
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
     <a class="control" href="javascript:void(0);" onclick="PlaySound();">▶️再生</a>
-    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud();">▶️大音量再生</a>
     <span class="status" id="time_from"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
     <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
   </div>
   <audio id="audioControl" controls></audio>
-  <div class="input">
-		<form name="ifRandomForm"><input type="checkbox" name="randomVolume">ランダムに大音量</form>
-  </div>
   <div class="input">
     <form name="startTimeForm">演奏開始位置:<input type="number" id="startTime" name="sec" value="0" pattern="[0-9]*">秒</form>
   </div>
