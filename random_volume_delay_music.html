@@ -23,7 +23,7 @@
     var startTimeS = 0;
     var stopTimeS  = 0;
     var startTimer;
-    var stopTimer;
+//    var stopTimer;
     var startTimeForm;
     var stopTimeForm;
     var musicURL;
@@ -61,7 +61,7 @@
 			request.send();
 		}
 
-    function playSoundWebAudio(buffer) {
+    function playSoundWebAudio(buffer, from_sec = 0) {
       source = context.createBufferSource(); // creates a sound source
 			if (!source.buffer){
         source.buffer = buffer;                    // tell the source which sound to play
@@ -70,14 +70,18 @@
 			source.connect(gainNode);
 			gainNode.connect(context.destination);
 			gainNode.gain.value = freestyleVolume;
-
+//, stopTimeS
       try {
 		    source.stop();
 			}
       catch(e) {
         console.log('Already stopped.');
       }
-      source.start(0);                           // play the source now
+			if (stopTimeS == 0){
+        source.start(0, from_sec);                           // play the source now
+			} else {
+        source.start(0, from_sec, stopTimeS); 
+			}
     }
 
     window.onError = function onError(){
@@ -151,17 +155,25 @@
 
 			
       console.log("PlaySoundCommon, volume = ", freestyleVolume);
-      playSoundWebAudio(freestyleBuffer);
+
 			
 
       moji.innerHTML = "Playing";
       document.bgColor = "#FFFFFF";
-      clearInterval(stopTimer);
+//      clearInterval(stopTimer);
+//      if (stopTimeS > 0){
+//        var stop_ms = parseInt(stopTimeS * 1000);
+//        stopTimer = setTimeout("StopSound()", stop_ms);
+//      }
+
       if (stopTimeS > 0){
         moji.innerHTML = "Playing until " + stopTimeS + " s";
-        var stop_ms = parseInt(stopTimeS * 1000);
-        stopTimer = setTimeout("StopSound()", stop_ms);
-      }
+				console.log("startTimeS is ", startTimeS, " stopTimeS is ", stopTimeS)
+        playSoundWebAudio(freestyleBuffer, startTimeS);
+			} else {
+				console.log("startTimeS is ", startTimeS)
+        playSoundWebAudio(freestyleBuffer, startTimeS);
+			}
     }
     function DelayPlaySound() {
       audioElem.play();
@@ -204,7 +216,7 @@
       }
 
 			clearTimeout(startTimer);
-      clearInterval(stopTimer);
+//      clearInterval(stopTimer);
       moji.innerHTML = "stop";
       document.bgColor = "#FFFFFF";
     }
