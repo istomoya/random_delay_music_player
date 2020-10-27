@@ -29,6 +29,7 @@
     var musicURL;
 
     // https://www.html5rocks.com/ja/tutorials/webaudio/intro/#toc-volume
+    var freestyleBuffer = null;
     var context;
     window.addEventListener('load', init, false);
     function init() {
@@ -42,8 +43,23 @@
         alert('Web Audio API is not supported in this browser');
       }
     }
+    function loadFreestyle(url){
+			var request = new XMLHttpRequest();
+			request.open('GET', url, true);
+			request.responseType = 'arraybuffer';
+
+			// Decode asynchronously
+			request.onload = function(){
+				context.decodeAudioData(request.response, function(buffer){
+					freestyleBuffer = buffer;
+				}, onError);
+			}
+			request.send();
+		}
+
 
     window.onload = function onLoad(){
+			init();
       var musicFile = document.getElementById("musicFileInputId");
       min = 5;
       max = 10;
@@ -81,16 +97,20 @@
     }
 
     function PlaySoundLoud() {
-			// unavailable on iOS // audioElem.volume=1.0;
+			// unavailable on iOS 
+			audioElem.volume=1.0;
 
-			gainNode.gain.value = 1.0;
+			//gainNode.gain.value = 1.0;
+
 			PlaySoundCommon();
 		}
 
 
     function PlaySound() {
-			// unavailable on iOS // audioElem.volume=0.5;
+			// unavailable on iOS 
+			audioElem.volume=0.5;
 			// gainNode.gain.value = 0.5;
+
       PlaySoundCommon();
 		}
     function PlaySoundCommon() {
