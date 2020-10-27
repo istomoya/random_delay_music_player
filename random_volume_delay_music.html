@@ -27,6 +27,9 @@
     var startTimeForm;
     var stopTimeForm;
     var musicURL;
+    var freestyleVolume = 0.5;
+    var source;
+   	var gainNode;
 
     // https://www.html5rocks.com/ja/tutorials/webaudio/intro/#toc-volume
     var freestyleBuffer = null;
@@ -48,6 +51,7 @@
 			request.open('GET', url, true);
 			request.responseType = 'arraybuffer';
 
+      console.log("loadFreeStyle URL is ", url);
 			// Decode asynchronously
 			request.onload = function(){
 				context.decodeAudioData(request.response, function(buffer){
@@ -57,7 +61,28 @@
 			request.send();
 		}
 
+    function playSoundWebAudio(buffer) {
+      source = context.createBufferSource(); // creates a sound source
+			if (!source.buffer){
+        source.buffer = buffer;                    // tell the source which sound to play
+			}
+			gainNode = context.createGain();
+			source.connect(gainNode);
+			gainNode.connect(context.destination);
+			gainNode.gain.value = freestyleVolume;
 
+      try {
+		    source.stop();
+			}
+      catch(e) {
+        console.log('Already stopped.');
+      }
+      source.start(0);                           // play the source now
+    }
+
+    window.onError = function onError(){
+			console.log("onError");
+		}
     window.onload = function onLoad(){
 			init();
       var musicFile = document.getElementById("musicFileInputId");
@@ -70,11 +95,15 @@
       audioElem = document.getElementById("audioControl");
 
       musicURL = "yonhonnorecorder.mp3"; // mp3のファイル名
-      audioElem.src = musicURL;
 
-			var gainNode = context.createGain();
-			//audioElem.connect(gainNode);
-			gainNode.connect(context.destination);
+      // audioElem.src = musicURL;
+      // source = context.createBufferSource(); // creates a sound source
+      //source.buffer = buffer;                    // tell the source which sound to play
+			// gainNode = context.createGain();
+			// source.connect(gainNode);
+			// gainNode.connect(context.destination);
+			// gainNode.gain.value = freestyleVolume;
+      loadFreestyle(musicURL);
 
       timespec.innerHTML = min + "〜" + max + "秒";
 
@@ -100,7 +129,7 @@
 			// unavailable on iOS 
 			audioElem.volume=1.0;
 
-			//gainNode.gain.value = 1.0;
+			freestyleVolume = 1.0;
 
 			PlaySoundCommon();
 		}
@@ -109,14 +138,22 @@
     function PlaySound() {
 			// unavailable on iOS 
 			audioElem.volume=0.5;
-			// gainNode.gain.value = 0.5;
+
+			freestyleVolume = 0.5;
 
       PlaySoundCommon();
 		}
     function PlaySoundCommon() {
       StopSound();
-      audioElem.currentTime = startTimeS;
-      audioElem.play();
+
+      // audioElem.currentTime = startTimeS;
+      // audioElem.play();
+
+			
+      console.log("PlaySoundCommon, volume = ", freestyleVolume);
+      playSoundWebAudio(freestyleBuffer);
+			
+
       moji.innerHTML = "Playing";
       document.bgColor = "#FFFFFF";
       clearInterval(stopTimer);
@@ -148,7 +185,24 @@
       document.bgColor = "#CCCCFF";
     }
     function StopSound(){
-      audioElem.pause();
+      //audioElem.pause();
+
+      console.log("StopSound");
+      //console.log("source.stop is ", source.stop);
+		//	if (!source.stop){
+   //     console.log("not source.stop");
+//				source.stop();
+//			} else {
+ //       console.log("source.stop. nothing to be done");
+	//		}
+
+      try {
+		    source.stop();
+			}
+      catch(e) {
+        console.log('Already stopped.');
+      }
+
 			clearTimeout(startTimer);
       clearInterval(stopTimer);
       moji.innerHTML = "stop";
@@ -190,8 +244,11 @@
         musicURL = URL.createObjectURL(file);
         // console.log( file );
         // console.log( musicURL );
-        audioElem.setAttribute('src', musicURL);
-        console.log( audioElem.src );
+
+        // audioElem.setAttribute('src', musicURL);
+        // console.log( audioElem.src );
+
+        loadFreestyle(musicURL);
       }
     }
     var startTimeInput = document.getElementById("startTime");
