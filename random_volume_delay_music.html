@@ -25,7 +25,9 @@
     var startTimeForm;
     var stopTimeForm;
     var musicURL;
-    var freestyleVolume = 0.5;
+    var normalVolume = 0.3;
+    var freestyleVolume = normalVolume;
+    var loudVolume = 1.0;
     var source;
     var gainNode;
 
@@ -120,13 +122,13 @@
     }
 
     function PlaySoundLoud() {
-      freestyleVolume = 1.0;
-      lowVolumeTimer = setTimeout("gainNode.gain.value = 0.5;", lowVolumeMS);
+      freestyleVolume = loudVolume;
+      lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS);
       PlaySoundCommon();
     }
 
     function PlaySound() {
-      freestyleVolume = 0.5;
+      freestyleVolume = normalVolume;
       PlaySoundCommon();
     }
 
