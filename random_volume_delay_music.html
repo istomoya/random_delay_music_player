@@ -25,7 +25,7 @@
     var startTimeForm;
     var stopTimeForm;
     var musicURL;
-    var normalVolume = 0.2;
+    var normalVolume = 0.3;
     var freestyleVolume = normalVolume;
     var loudVolume = 1.0;
     var source;
@@ -50,10 +50,6 @@
       }
     }
     function loadFreestyle(url){
-			if (url == ""){
-        console.log('music url is empty.');
-				return;
-			}
       var request = new XMLHttpRequest();
       request.open('GET', url, true);
       request.responseType = 'arraybuffer';
@@ -94,6 +90,7 @@
       console.log("onError");
     }
     window.onload = function onLoad(){
+      init();
       var musicFile = document.getElementById("musicFileInputId");
       min = 5;
       max = 10;
@@ -101,17 +98,13 @@
       timespec = document.getElementById("timespec");
       time_from = document.getElementById("time_from");
 
-      musicURL = ""; // "yonhonnorecorder.mp3"; // mp3のファイル名
+      musicURL = "yonhonnorecorder.mp3"; // mp3のファイル名
 
-      init();
       loadFreestyle(musicURL);
 
       timespec.innerHTML = min + "〜" + max + "秒";
-			if (musicURL == ""){
-				moji.innerHTML = "mp3ファイルを指定してください";
-			} else {
-        moji.innerHTML = "Music ready.";
-			}
+
+      moji.innerHTML     = "stop";
       // moji.innerHTML     = "初回やリロード直後は音が出ないことがあります。一度[▶️再生]を押すと、正常動作するようになります。";
 
       startTimeS = 0;
@@ -141,8 +134,6 @@
 
     function PlaySoundCommon() {
       StopSound();
-      init();
-      loadFreestyle(musicURL);
       console.log("PlaySoundCommon, volume = ", freestyleVolume);
 
       moji.innerHTML = "Playing. Initial Volume=" + freestyleVolume;
@@ -185,7 +176,7 @@
       }
 
       clearTimeout(startTimer);
-      moji.innerHTML = "Music ready.";
+      moji.innerHTML = "stop";
       document.bgColor = "#FFFFFF";
     }
   </script>
@@ -222,14 +213,8 @@
       if (musicFile.value){
         var file = musicFile.files[0];
         musicURL = URL.createObjectURL(file);
-        init();
         loadFreestyle(musicURL);
       }
-			if (musicURL == ""){
-				moji.innerHTML = "mp3ファイルを指定してください";
-			} else {
-        moji.innerHTML = "Music ready.";
-			}
     }
     var startTimeInput = document.getElementById("startTime");
     var stopTimeInput  = document.getElementById("stopTime");
