@@ -108,7 +108,7 @@
 
       timespec.innerHTML = min + "〜" + max + "秒";
 			if (musicURL == ""){
-				moji.innerHTML = "mp3ファイルを指定してください";
+				moji.innerHTML = "ファイルを指定してください(.mp3)";
 			} else {
         moji.innerHTML = "Music ready.";
 			}
@@ -131,16 +131,17 @@
     function PlaySoundLoud() {
       freestyleVolume = loudVolume;
       lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS);
+      StopSound();
       PlaySoundCommon();
     }
 
     function PlaySound() {
       freestyleVolume = normalVolume;
+      StopSound();
       PlaySoundCommon();
     }
 
     function PlaySoundCommon() {
-      StopSound();
       init();
       loadFreestyle(musicURL);
       console.log("PlaySoundCommon, volume = ", freestyleVolume);
@@ -158,6 +159,8 @@
       }
     }
     function DelayPlaySound() {
+			// not works on iphone ......   PlaySound();
+      // not works on iphone ...... PlaySoundCommon();
       StopSound();
 
       var sec = min + (max - min) * Math.random();
@@ -226,7 +229,7 @@
         loadFreestyle(musicURL);
       }
 			if (musicURL == ""){
-				moji.innerHTML = "mp3ファイルを指定してください";
+				moji.innerHTML = "ファイルを指定してください(.mp3)";
 			} else {
         moji.innerHTML = "Music ready.";
 			}
