@@ -108,7 +108,7 @@
 
       timespec.innerHTML = min + "〜" + max + "秒";
 			if (musicURL == ""){
-				moji.innerHTML = "mp3ファイルを指定してください";
+				moji.innerHTML = "ファイルを指定してください(.mp3)";
 			} else {
         moji.innerHTML = "Music ready.";
 			}
@@ -158,6 +158,7 @@
       }
     }
     function DelayPlaySound() {
+			PlaySound();
       StopSound();
 
       var sec = min + (max - min) * Math.random();
@@ -226,7 +227,7 @@
         loadFreestyle(musicURL);
       }
 			if (musicURL == ""){
-				moji.innerHTML = "mp3ファイルを指定してください";
+				moji.innerHTML = "ファイルを指定してください(.mp3)";
 			} else {
         moji.innerHTML = "Music ready.";
 			}
