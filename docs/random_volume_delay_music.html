@@ -3,7 +3,7 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Random Delay Music Player</title>
+  <title>Random Volume Delay Music Player</title>
   <meta charset="utf-8" />
   <style type="text/css">
   <!--
@@ -49,12 +49,18 @@
         alert('Web Audio API is not supported in this browser');
       }
     }
-    function loadFreestyle(url){
+    function loadFreestyle(musicURL){
       var request = new XMLHttpRequest();
-      request.open('GET', url, true);
+      request.open('GET', musicURL, true);
       request.responseType = 'arraybuffer';
 
-      console.log("loadFreeStyle URL is ", url);
+      console.log("loadFreestyle URL is ", musicURL);
+      if (musicURL == ""){
+        moji.innerHTML     = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML     = "Music ready.";
+      }
+
       // Decode asynchronously
       request.onload = function(){
         context.decodeAudioData(request.response, function(buffer){
@@ -64,10 +70,18 @@
       request.send();
     }
 
-    function playSoundWebAudio(buffer, from_sec = 0) {
+    function playSoundWebAudio(buffer, delay_sec, from_sec = 0) {
+      StopSound();
+      startTimer = setTimeout( "startVisual()", delay_sec * 1000 );
+      console.log(
+        "PlaySoundWebAudio, volume = ", freestyleVolume, 
+        " delay_sec = ", delay_sec, 
+        " startTimeS = ", startTimeS, 
+        " stopTimeS = ", stopTimeS
+      );
       source = context.createBufferSource(); // creates a sound source
       if (!source.buffer){
-        source.buffer = buffer;                    // tell the source which sound to play
+        source.buffer = buffer;       // tell the source which sound to play
       }
       gainNode = context.createGain();
       source.connect(gainNode);
@@ -80,9 +94,9 @@
         console.log('Already stopped.');
       }
       if (stopTimeS > 0){
-        source.start(0, from_sec, stopTimeS); 
+        source.start(context.currentTime + delay_sec, from_sec, stopTimeS); 
       } else {
-        source.start(0, from_sec);                           // play the source now
+        source.start(context.currentTime + delay_sec, from_sec);                           // play the source now
       }
     }
 
@@ -103,11 +117,6 @@
       loadFreestyle(musicURL);
 
       timespec.innerHTML = min + "〜" + max + "秒";
-      if (musicURL == ""){
-        moji.innerHTML     = "ファイルを指定してください(.mp3)";
-      }else{
-        moji.innerHTML     = "Music ready.";
-      }
       // moji.innerHTML     = "初回やリロード直後は音が出ないことがあります。一度[▶️再生]を押すと、正常動作するようになります。";
 
       startTimeS = 0;
@@ -124,51 +133,41 @@
       ifRandomFormCheck.checked = false;
     }
 
-    function PlaySoundLoud() {
-      freestyleVolume = loudVolume;
-      lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS);
-      PlaySoundCommon();
-    }
-
-    function PlaySound() {
-      freestyleVolume = normalVolume;
-      PlaySoundCommon();
-    }
-
-    function PlaySoundCommon() {
-      StopSound();
-      console.log("PlaySoundCommon, volume = ", freestyleVolume);
-
+    function startVisual(){
       moji.innerHTML = "Playing. Initial Volume=" + freestyleVolume;
       document.bgColor = "#FFFFFF";
-
-      if (stopTimeS > 0){
-        moji.innerHTML = "Playing until " + stopTimeS + " s";
-        console.log("startTimeS is ", startTimeS, " stopTimeS is ", stopTimeS)
-        playSoundWebAudio(freestyleBuffer, startTimeS);
-      } else {
-        console.log("startTimeS is ", startTimeS)
-        playSoundWebAudio(freestyleBuffer, startTimeS);
-      }
     }
+
+    function PlaySoundLoud(delay_sec) {
+      freestyleVolume = loudVolume;
+      lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS);
+      playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
+    }
+
+    function PlaySound(delay_sec) {
+      freestyleVolume = normalVolume;
+      playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
+    }
+
     function DelayPlaySound() {
       StopSound();
 
-      var sec = min + (max - min) * Math.random();
-      var milisec = parseInt(sec * 1000);
+      var delay_sec = min + (max - min) * Math.random();
+      var milisec = parseInt(delay_sec * 1000);
       if (ifRandomFormCheck.checked){
         moji.innerHTML = "Random Volume. Are you ready? (delay " + min + "-" + max + " s)";
         if (Math.random() < 0.3){
-          startTimer = setTimeout("PlaySoundLoud()", milisec);
+          PlaySoundLoud(delay_sec);
         }else{
-          startTimer = setTimeout("PlaySound()", milisec);
+          PlaySound(delay_sec);
         }
       } else {
         moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
-        startTimer = setTimeout("PlaySound()", milisec);
+        PlaySound(delay_sec);
       }
       document.bgColor = "#CCCCFF";
     }
+
     function StopSound(){
       console.log("StopSound");
       try {
