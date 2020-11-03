@@ -58,7 +58,7 @@
       if (musicURL == ""){
         moji.innerHTML     = "ファイルを指定してください(.mp3)";
       }else{
-        moji.innerHTML     = "Music ready.";
+        moji.innerHTML     = "Music ready...";
       }
 
       // Decode asynchronously
@@ -71,7 +71,6 @@
     }
 
     function playSoundWebAudio(buffer, delay_sec = 0, from_sec = 0) {
-      StopSound();
       startTimer = setTimeout( "startVisual()", delay_sec * 1000 );
       console.log(
         "PlaySoundWebAudio, volume = ", freestyleVolume, 
@@ -204,7 +203,7 @@
       if (musicURL == ""){
         moji.innerHTML     = "ファイルを指定してください(.mp3)";
       }else{
-        moji.innerHTML     = "Music ready.";
+        moji.innerHTML     = "Music ready..";
       }
       document.bgColor = "#FFFFFF";
     }
@@ -213,9 +212,9 @@
 <body>
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
-		<a class="control" href="javascript:void(0);" onclick="PlaySound(0);">▶️再生</a>
+		<a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySound(0);">▶️再生</a>
     <span class="status" id="time_from"></span><br/>
-    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud(0);">▶️5秒大音量</a>
+    <a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySoundLoud(0);">▶️5秒大音量</a>
     <span class="status" id="time_from2"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
