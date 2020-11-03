@@ -99,8 +99,8 @@
       } else {
         source.start(context.currentTime + delay_sec, from_sec);                           // play the source now
       }
-      // source.onstop("onstop_test();");
-      // source.onended("onstop_test();");
+      source.onstop  = function(){onstop_test();}
+      source.onended = function(){onstop_test();}
     }
 
 
