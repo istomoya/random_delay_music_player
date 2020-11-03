@@ -147,7 +147,7 @@
 
     function PlaySoundLoud(delay_sec) {
       freestyleVolume = loudVolume;
-      lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS);
+      lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS + delay_sec * 1000);
       playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
     }
 
