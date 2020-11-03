@@ -24,7 +24,7 @@
     var startTimer;
     var startTimeForm;
     var stopTimeForm;
-    var musicURL;
+    var musicURL = "";
     var normalVolume = 0.2;
     var freestyleVolume = normalVolume;
     var loudVolume = 1.0;
@@ -136,7 +136,12 @@
     }
 
     function startVisual(){
-      moji.innerHTML = "Playing. Initial Volume=" + freestyleVolume;
+      console.log("musicURL ", musicURL);
+      if (musicURL == ""){
+        moji.innerHTML     = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML = "Playing. Initial Volume=" + freestyleVolume;
+      }
       document.bgColor = "#FFFFFF";
     }
 
@@ -153,6 +158,10 @@
 
     function DelayPlaySound() {
       StopSound();
+      if (musicURL == ""){
+        moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
+        return;
+      }
 
       var delay_sec = min + (max - min) * Math.random();
       var milisec = parseInt(delay_sec * 1000);
@@ -192,8 +201,8 @@
 <body>
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
-		<a class="control" href="javascript:void(0);" onclick="PlaySound();">▶️再生</a><br>
-    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud();">▶️5秒大音量</a>
+		<a class="control" href="javascript:void(0);" onclick="PlaySound(0);">▶️再生</a><br>
+    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud(0);">▶️5秒大音量</a>
     <span class="status" id="time_from"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
