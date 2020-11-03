@@ -70,7 +70,7 @@
       request.send();
     }
 
-    function playSoundWebAudio(buffer, delay_sec, from_sec = 0) {
+    function playSoundWebAudio(buffer, delay_sec = 0, from_sec = 0) {
       StopSound();
       startTimer = setTimeout( "startVisual()", delay_sec * 1000 );
       console.log(
@@ -93,6 +93,8 @@
       catch(e) {
         console.log('Already stopped.');
       }
+      console.log("delay_sec ", delay_sec);
+      console.log("content.currentTime ", context.currentTime);
       if (stopTimeS > 0){
         source.start(context.currentTime + delay_sec, from_sec, stopTimeS); 
       } else {
