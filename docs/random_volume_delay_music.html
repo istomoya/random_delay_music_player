@@ -100,6 +100,17 @@
       } else {
         source.start(context.currentTime + delay_sec, from_sec);                           // play the source now
       }
+      source.onstop("onstop_test();");
+    }
+
+
+    function onstop_test(){
+      console.log("onstop_test()");
+      if (musicURL == ""){
+        moji.innerHTML = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML = "Music Ready.";
+      }
     }
 
     window.onError = function onError(){
@@ -201,9 +212,10 @@
 <body>
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
-		<a class="control" href="javascript:void(0);" onclick="PlaySound(0);">▶️再生</a><br>
-    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud(0);">▶️5秒大音量</a>
+		<a class="control" href="javascript:void(0);" onclick="PlaySound(0);">▶️再生</a>
     <span class="status" id="time_from"></span><br/>
+    <a class="control" href="javascript:void(0);" onclick="PlaySoundLoud(0);">▶️5秒大音量</a>
+    <span class="status" id="time_from2"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
     <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
@@ -239,18 +251,22 @@
       startTimeS = parseInt( startTimeInput.value );
       StopSound();
       if (stopTimeS > 0){
-        time_from.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
+        time_from.innerHTML  = startTimeS + "秒時点から" + stopTimeS + "秒間";
+        time_from2.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
       }else{
-        time_from.innerHTML = startTimeS + "秒時点から";
+        time_from.innerHTML  = startTimeS + "秒時点から";
+        time_from2.innerHTML = startTimeS + "秒時点から";
       }
     }
     stopTimeInput.onchange = function(){
       stopTimeS = parseInt( stopTimeInput.value );
       StopSound();
       if (stopTimeS > 0){
-        time_from.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
+        time_from.innerHTML  = startTimeS + "秒時点から" + stopTimeS + "秒間";
+        time_from2.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
       }else{
-        time_from.innerHTML = startTimeS + "秒時点から";
+        time_from.innerHTML  = startTimeS + "秒時点から";
+        time_from2.innerHTML = startTimeS + "秒時点から";
       }
     }
 //-->
