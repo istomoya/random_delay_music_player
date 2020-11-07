@@ -33,6 +33,10 @@
 
     var lowVolumeTimer;
     var lowVolumeMS = 5000;
+    var time_now;
+    var time_full;
+    var currentTime_at_start;
+    var  show_time;
 
     // https://www.html5rocks.com/ja/tutorials/webaudio/intro/#toc-volume
     var freestyleBuffer = null;
@@ -57,9 +61,9 @@
       console.log("loadFreestyle URL is ", musicURL);
       if (musicURL == ""){
         moji.innerHTML     = "ファイルを指定してください(.mp3)";
-      }else{
-        moji.innerHTML     = "Music ready...";
+        return;
       }
+      moji.innerHTML     = "Music ready...";
 
       // Decode asynchronously
       request.onload = function(){
@@ -70,6 +74,15 @@
       request.send();
     }
 
+    function show_time_sec(){
+      let sec = Math.floor(context.currentTime - currentTime_at_start);
+			// console.log("show_time_sec:", sec);
+      if (sec > 0){
+        time_now.innerHTML = String(Math.floor(sec)) + '秒' ;
+      }
+    }
+
+
     function playSoundWebAudio(buffer, delay_sec = 0, from_sec = 0) {
       startTimer = setTimeout( "startVisual()", delay_sec * 1000 );
       console.log(
@@ -79,6 +92,7 @@
         " stopTimeS = ", stopTimeS
       );
       source = context.createBufferSource(); // creates a sound source
+
       if (!source.buffer){
         source.buffer = buffer;       // tell the source which sound to play
       }
@@ -92,6 +106,10 @@
       catch(e) {
         console.log('Already stopped.');
       }
+
+      currentTime_at_start = context.currentTime + delay_sec;
+      show_time = setInterval("show_time_sec();", 200);
+
       console.log("delay_sec ", delay_sec);
       console.log("content.currentTime ", context.currentTime);
       if (stopTimeS > 0){
@@ -106,6 +124,7 @@
 
     function onstop_test(){
       console.log("onstop_test()");
+      clearInterval(show_time);
       if (musicURL == ""){
         moji.innerHTML = "ファイルを指定してください(.mp3)";
       }else{
@@ -124,6 +143,9 @@
       moji     = document.getElementById("output");
       timespec = document.getElementById("timespec");
       time_from = document.getElementById("time_from");
+
+      time_now  = document.getElementById("time_now");
+      time_full = document.getElementById("time_full");
 
       musicURL = ""; // yonhonnorecorder.mp3"; // mp3のファイル名
 
@@ -199,6 +221,7 @@
         console.log('Already stopped.');
       }
 
+      clearInterval(show_time);
       clearTimeout(startTimer);
       if (musicURL == ""){
         moji.innerHTML     = "ファイルを指定してください(.mp3)";
@@ -212,13 +235,16 @@
 <body>
   <div class="status" id="output">javascript disabled.</div>
   <div class="control">
-		<a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySound(0);">▶️再生</a>
+    <a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySound(0);">▶️再生</a>
     <span class="status" id="time_from"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySoundLoud(0);">▶️5秒大音量</a>
     <span class="status" id="time_from2"></span><br/>
     <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
     <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
     <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
+  </div>
+  <div class="control">
+    <span class="time" id="time_now">0秒</span> <span class="time" id="time_full"></span>
   </div>
   <!-- audio id="audioControl" controls></audio -->
   <div class="input">
