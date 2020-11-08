@@ -225,7 +225,7 @@
     function onstop_test(){
       console.log("onstop_test()");
       clearInterval(show_time);  console.log("onstop_test: cleaInterval(show_time)");
-      time_now.innerHTML = '0秒' ;
+      // time_now.innerHTML = '0秒' ;
       clearTimeout(startTimer);
       if (musicURL == ""){
         moji.innerHTML = "ファイルを指定してください(.mp3)";
@@ -244,7 +244,7 @@
       }
 
       clearInterval(show_time);  console.log("StopSound: cleaInterval(show_time)");
-      time_now.innerHTML = '0秒' ;
+      // time_now.innerHTML = '0秒' ;
       clearTimeout(startTimer);
       if (musicURL == ""){
         moji.innerHTML     = "ファイルを指定してください(.mp3)";
