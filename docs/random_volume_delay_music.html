@@ -76,7 +76,6 @@
 
     function show_time_sec(){
       let sec = Math.floor(context.currentTime - currentTime_at_start);
-			// console.log("show_time_sec:", sec);
       if (sec > 0){
         time_now.innerHTML = String(Math.floor(sec)) + '秒' ;
       }
@@ -108,7 +107,8 @@
       }
 
       currentTime_at_start = context.currentTime + delay_sec;
-      show_time = setInterval("show_time_sec();", 200);
+      show_time = setInterval("show_time_sec();", 200);  console.log("setInterval(.., 200);");
+
 
       console.log("delay_sec ", delay_sec);
       console.log("content.currentTime ", context.currentTime);
@@ -117,19 +117,18 @@
       } else {
         source.start(context.currentTime + delay_sec, from_sec);                           // play the source now
       }
-      source.onstop  = function(){onstop_test();}
-      source.onended = function(){onstop_test();}
-    }
-
-
-    function onstop_test(){
-      console.log("onstop_test()");
-      clearInterval(show_time);
-      if (musicURL == ""){
-        moji.innerHTML = "ファイルを指定してください(.mp3)";
-      }else{
-        moji.innerHTML = "Music Ready.";
-      }
+      source.onstop  = function(){
+				console.log("source.onstop");  onstop_test();
+			}
+      source.onended = function(){
+        console.log("source.onended. Info:", 
+					" currentTime_at_start=", currentTime_at_start, 
+					" context.currentTime=",  context.currentTime  
+				); 
+				if (currentTime_at_start + 0.2 < context.currentTime){
+					onstop_test();
+				}
+			}
     }
 
     window.onError = function onError(){
@@ -179,13 +178,23 @@
     }
 
     function PlaySoundLoud(delay_sec) {
+      if (musicURL == ""){
+        moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
+        return;
+      }
       freestyleVolume = loudVolume;
       lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS + delay_sec * 1000);
+			console.log("calling playSoundWebAudio");
       playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
     }
 
     function PlaySound(delay_sec) {
+      if (musicURL == ""){
+        moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
+        return;
+      }
       freestyleVolume = normalVolume;
+			console.log("calling playSoundWebAudio");
       playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
     }
 
@@ -212,6 +221,19 @@
       document.bgColor = "#CCCCFF";
     }
 
+
+    function onstop_test(){
+      console.log("onstop_test()");
+      clearInterval(show_time);  console.log("onstop_test: cleaInterval(show_time)");
+      time_now.innerHTML = '0秒' ;
+      clearTimeout(startTimer);
+      if (musicURL == ""){
+        moji.innerHTML = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML = "Music Ready.";
+      }
+    }
+
     function StopSound(){
       console.log("StopSound");
       try {
@@ -221,7 +243,8 @@
         console.log('Already stopped.');
       }
 
-      clearInterval(show_time);
+      clearInterval(show_time);  console.log("StopSound: cleaInterval(show_time)");
+      time_now.innerHTML = '0秒' ;
       clearTimeout(startTimer);
       if (musicURL == ""){
         moji.innerHTML     = "ファイルを指定してください(.mp3)";

@@ -121,7 +121,10 @@
 				console.log("source.onstop");  onstop_test();
 			}
       source.onended = function(){
-        console.log("source.onended"); onstop_test();
+        console.log("source.onended. context.currentTime=", context.currentTime,  " currentTime_at_start=", currentTime_at_start); 
+				if (currentTime_at_start + 0.2 < context.currentTime){
+					onstop_test();
+				}
 			}
     }
 
@@ -193,6 +196,7 @@
     }
 
     function DelayPlaySound() {
+      StopSound();
       if (musicURL == ""){
         moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
         return;
