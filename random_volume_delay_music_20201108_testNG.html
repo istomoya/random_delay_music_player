@@ -1,0 +1,358 @@
+<!DOCTYPE html> 
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Random Volume Delay Music Player</title>
+  <meta charset="utf-8" />
+  <style type="text/css">
+  <!--
+    a.control {font-size:150%;}
+    @media only screen and (max-device-width : 480px){
+      div.status {font-size:120%;}
+      div.control{font-size:120%;}
+      div.input  {font-size:120%;}
+    }
+  -->
+  </style>
+  <script type="text/javascript">
+    var moji;
+    var min;
+    var max;
+    var startTimeS = 0;
+    var stopTimeS  = 0;
+    var startTimer;
+    var startTimeForm;
+    var stopTimeForm;
+    var musicURL = "";
+    var normalVolume = 0.2;
+    var freestyleVolume = normalVolume;
+    var loudVolume = 1.0;
+    var source;
+    var gainNode;
+
+    var lowVolumeTimer;
+    var lowVolumeMS = 5000;
+    var time_now;
+    var time_full;
+    var currentTime_at_start;
+    var  show_time;
+
+    // https://www.html5rocks.com/ja/tutorials/webaudio/intro/#toc-volume
+    var freestyleBuffer = null;
+    var context;
+    window.addEventListener('load', init, false);
+    function init() {
+      try {
+        // Fix up for prefixing
+        window.AudioContext = window.AudioContext||window.webkitAudioContext;
+        context = new AudioContext();
+        // alert('AudoContext ready');
+      }
+      catch(e) {
+        alert('Web Audio API is not supported in this browser');
+      }
+    }
+    function loadFreestyle(musicURL){
+      var request = new XMLHttpRequest();
+      request.open('GET', musicURL, true);
+      request.responseType = 'arraybuffer';
+
+      console.log("loadFreestyle URL is ", musicURL);
+      if (musicURL == ""){
+        moji.innerHTML     = "ファイルを指定してください(.mp3)";
+        return;
+      }
+      moji.innerHTML     = "Music ready...";
+
+      // Decode asynchronously
+      request.onload = function(){
+        context.decodeAudioData(request.response, function(buffer){
+          freestyleBuffer = buffer;
+        }, onError);
+      }
+      request.send();
+    }
+
+    function show_time_sec(){
+      let sec = Math.floor(context.currentTime - currentTime_at_start);
+      if (sec > 0){
+        time_now.innerHTML = String(Math.floor(sec)) + '秒' ;
+      }
+    }
+
+
+    function playSoundWebAudio(buffer, delay_sec = 0, from_sec = 0) {
+      startTimer = setTimeout( "startVisual()", delay_sec * 1000 );
+      console.log(
+        "PlaySoundWebAudio, volume = ", freestyleVolume, 
+        " delay_sec = ", delay_sec, 
+        " startTimeS = ", startTimeS, 
+        " stopTimeS = ", stopTimeS
+      );
+      source = context.createBufferSource(); // creates a sound source
+
+      if (!source.buffer){
+        source.buffer = buffer;       // tell the source which sound to play
+      }
+      gainNode = context.createGain();
+      source.connect(gainNode);
+      gainNode.connect(context.destination);
+      gainNode.gain.value = freestyleVolume;
+      try {
+        source.stop();
+      }
+      catch(e) {
+        console.log('Already stopped.');
+      }
+
+      currentTime_at_start = context.currentTime + delay_sec;
+      show_time = setInterval("show_time_sec();", 200);  console.log("setInterval(.., 200);");
+
+
+      console.log("delay_sec ", delay_sec);
+      console.log("content.currentTime ", context.currentTime);
+      if (stopTimeS > 0){
+        source.start(context.currentTime + delay_sec, from_sec, stopTimeS); 
+      } else {
+        source.start(context.currentTime + delay_sec, from_sec);                           // play the source now
+      }
+      source.onstop  = function(){
+				console.log("source.onstop");  onstop_test();
+			}
+      source.onended = function(){
+        console.log("source.onended"); onstop_test();
+			}
+    }
+
+    window.onError = function onError(){
+      console.log("onError");
+    }
+    window.onload = function onLoad(){
+      init();
+      var musicFile = document.getElementById("musicFileInputId");
+      min = 5;
+      max = 10;
+      moji     = document.getElementById("output");
+      timespec = document.getElementById("timespec");
+      time_from = document.getElementById("time_from");
+
+      time_now  = document.getElementById("time_now");
+      time_full = document.getElementById("time_full");
+
+      musicURL = ""; // yonhonnorecorder.mp3"; // mp3のファイル名
+
+      loadFreestyle(musicURL);
+
+      timespec.innerHTML = min + "〜" + max + "秒";
+      // moji.innerHTML     = "初回やリロード直後は音が出ないことがあります。一度[▶️再生]を押すと、正常動作するようになります。";
+
+      startTimeS = 0;
+      stopTimeS = 0;
+      startTimeForm = document.forms.startTimeForm;
+      stopTimeForm  = document.forms.stopTimeForm;
+      startTimeForm.sec.value = startTimeS;
+      stopTimeForm.sec.value  = stopTimeS;
+
+      musicFileForm = document.forms.musicFileInput;
+      musicFileForm.musicFileInputId.value = "";
+
+      ifRandomFormCheck = document.forms.ifRandomForm.randomVolume;
+      ifRandomFormCheck.checked = false;
+    }
+
+    function startVisual(){
+      console.log("musicURL ", musicURL);
+      if (musicURL == ""){
+        moji.innerHTML     = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML = "Playing. Initial Volume=" + freestyleVolume;
+      }
+      document.bgColor = "#FFFFFF";
+    }
+
+    function PlaySoundLoud(delay_sec) {
+      if (musicURL == ""){
+        moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
+        return;
+      }
+      freestyleVolume = loudVolume;
+      lowVolumeTimer = setTimeout("gainNode.gain.value = normalVolume;", lowVolumeMS + delay_sec * 1000);
+			console.log("calling playSoundWebAudio");
+      playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
+    }
+
+    function PlaySound(delay_sec) {
+      if (musicURL == ""){
+        moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
+        return;
+      }
+      freestyleVolume = normalVolume;
+			console.log("calling playSoundWebAudio");
+      playSoundWebAudio(freestyleBuffer, delay_sec, startTimeS);
+    }
+
+    function DelayPlaySound() {
+      if (musicURL == ""){
+        moji.innerHTML     = "<strong>ファイルを指定してください(.mp3)</strong>";
+        return;
+      }
+
+      var delay_sec = min + (max - min) * Math.random();
+      var milisec = parseInt(delay_sec * 1000);
+      if (ifRandomFormCheck.checked){
+        moji.innerHTML = "Random Volume. Are you ready? (delay " + min + "-" + max + " s)";
+        if (Math.random() < 0.3){
+          PlaySoundLoud(delay_sec);
+        }else{
+          PlaySound(delay_sec);
+        }
+      } else {
+        moji.innerHTML = "Player, are you ready? (delay " + min + "-" + max + " s)";
+        PlaySound(delay_sec);
+      }
+      document.bgColor = "#CCCCFF";
+    }
+
+
+    function onstop_test(){
+      console.log("onstop_test()");
+      clearInterval(show_time);  console.log("onstop_test: cleaInterval(show_time)");
+      time_now.innerHTML = '0秒' ;
+      clearTimeout(startTimer);
+      if (musicURL == ""){
+        moji.innerHTML = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML = "Music Ready.";
+      }
+    }
+
+    function StopSound(){
+      console.log("StopSound");
+      try {
+        source.stop();
+      }
+      catch(e) {
+        console.log('Already stopped.');
+      }
+
+      clearInterval(show_time);  console.log("StopSound: cleaInterval(show_time)");
+      time_now.innerHTML = '0秒' ;
+      clearTimeout(startTimer);
+      if (musicURL == ""){
+        moji.innerHTML     = "ファイルを指定してください(.mp3)";
+      }else{
+        moji.innerHTML     = "Music ready..";
+      }
+      document.bgColor = "#FFFFFF";
+    }
+  </script>
+</head>
+<body>
+  <div class="status" id="output">javascript disabled.</div>
+  <div class="control">
+    <a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySound(0);">▶️再生</a>
+    <span class="status" id="time_from"></span><br/>
+    <a class="control" href="javascript:void(0);" onclick="StopSound(); PlaySoundLoud(0);">▶️5秒大音量</a>
+    <span class="status" id="time_from2"></span><br/>
+    <a class="control" href="javascript:void(0);" onclick="DelayPlaySound();">
+    <span class="status" id="timespec">x秒</span>後に再生⏰▶️</a><br/>
+    <a class="control" href="javascript:void(0);" onclick="StopSound();">⏹停止</a><br />
+  </div>
+  <div class="control">
+    <span class="time" id="time_now">0秒</span> <span class="time" id="time_full"></span>
+  </div>
+  <!-- audio id="audioControl" controls></audio -->
+  <div class="input">
+    <form name="ifRandomForm"><input type="checkbox" name="randomVolume">ランダムに大音量</form>
+  </div>
+  <div class="input">
+    <form name="startTimeForm">演奏開始位置:<input type="number" id="startTime" name="sec" value="0" pattern="[0-9]*">秒</form>
+  </div>
+  <div class="input">
+    <form name="stopTimeForm">演奏秒数:<input type="number" id="stopTime" name="sec" value="0" pattern="[0-9]*">秒</form>(0は最後まで演奏)
+  </div>
+  <div class="input">
+    <!-- NG 2020-may accept="audio/*" -->
+    <!-- NG 2020-may accept="audio/*,mp3" -->
+    <form name="musicFileInput"><input type="file" id="musicFileInputId" accept="mp3"></form>
+  </div>
+  <script type="text/javascript">
+<!--    
+    var musicFile = document.getElementById("musicFileInputId");
+    musicFile.onchange = function(){
+      if (musicFile.value){
+        var file = musicFile.files[0];
+        musicURL = URL.createObjectURL(file);
+        loadFreestyle(musicURL);
+      }
+    }
+    var startTimeInput = document.getElementById("startTime");
+    var stopTimeInput  = document.getElementById("stopTime");
+    startTimeInput.onchange = function(){
+      startTimeS = parseInt( startTimeInput.value );
+      StopSound();
+      if (stopTimeS > 0){
+        time_from.innerHTML  = startTimeS + "秒時点から" + stopTimeS + "秒間";
+        time_from2.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
+      }else{
+        time_from.innerHTML  = startTimeS + "秒時点から";
+        time_from2.innerHTML = startTimeS + "秒時点から";
+      }
+    }
+    stopTimeInput.onchange = function(){
+      stopTimeS = parseInt( stopTimeInput.value );
+      StopSound();
+      if (stopTimeS > 0){
+        time_from.innerHTML  = startTimeS + "秒時点から" + stopTimeS + "秒間";
+        time_from2.innerHTML = startTimeS + "秒時点から" + stopTimeS + "秒間";
+      }else{
+        time_from.innerHTML  = startTimeS + "秒時点から";
+        time_from2.innerHTML = startTimeS + "秒時点から";
+      }
+    }
+//-->
+  </script>
+  
+  <hr>
+  <h3>説明</h3>
+  <h4>このページは？</h4>
+  <p>このwebページは、指定したファイル(.mp3)の音楽を、ランダムな秒数だけ待ってから再生します。</p>
+  <h4>再生する楽曲</h4>
+  <p>WindowsやMacやAndrondをお使いの場合、そのPCやデバイスにあるmp3ファイルが選択できます。</p>
+  <p>iOSをお使いの場合、あなたのiCloud DriveやDropboxにあるmp3ファイルが選択できます。（「ミュージック」アプリの楽曲は選択できないようです）</p>
+  <p>ファイルが未選択だと、音は出ません。</p>
+  <h4>再生を待つ秒数</h4>
+  「(数字)〜(数字)秒後に再生⏰▶️」を押すと、その範囲内のランダムな秒数だけ待ってから楽曲を再生します。
+  <h4>再生開始時点、終了時点</h4>
+  <p>
+  「演奏開始位置」と「演奏秒数」で、指定した楽曲の、何秒目から、何秒間を再生するか指定できます。
+  「演奏秒数」が0だと、その楽曲を最後まで再生します。</p>
+  
+  <h4>5秒大音量</h4>
+  音楽の冒頭の５秒を、大きい音量で、その後続いて通常に再生します。
+  
+  <h4>ランダムに大音量</h4>
+  チェックを入れてから、「(数字)〜(数字)秒後に再生⏰▶️」を押すと、
+  通常の再生か、５秒大音量の再生か、どちらかをランダムに行います。
+  
+  <h4>音が出ない</h4>
+  <p>iPhoneで、スリープから復帰した後などに音が出なくなることがあります。
+  原因不明です。
+  おそらくSafariのWeb Audio APIの実装が原因と思います。
+  このページをリロードするとまた音が出るようになります。</p>
+<!-- 
+<p>
+初回やリロード直後は[...秒後に再生]を押しても、音が出ないことがあります。
+一度[再生]を押すと、正常動作するようになります。
+初回音が出ないのは、iOSやAndroidのブラウザーに、
+ユーザーの操作時にしか音楽が再生できないという制限があるためです。</p>
+<p>参考：
+<a href="http://jquerystudy.info/wordpress/?p=6647">ブラウザアプリでのサウンド再生（苦悩編）</a>、
+<a href="https://qiita.com/pentamania/items/2c568a9ec52148bbfd08">qiita iOSでのオーディオ再生制限の解除方法いろいろ</a></p>
+-->
+  <h4>作者</h4>
+  <a href="https://twitter.com/tomoyaisoshima">twitter:@tomoyaisoshima</a>
+</body>
+</html>
+
